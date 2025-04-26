@@ -31,7 +31,6 @@ export default function Dashboard() {
       setTables(data);
       setError(null);
     } catch (err) {
-      console.error("Error loading tables:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -58,7 +57,6 @@ export default function Dashboard() {
       setTables([addedTable, ...tables]);
       setIsAddDialogOpen(false);
     } catch (err) {
-      console.error("Error adding table:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -73,7 +71,6 @@ export default function Dashboard() {
       await deleteTable(id);
       setTables(tables.filter((table) => table.id !== id));
     } catch (err) {
-      console.error("Error deleting table:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -92,7 +89,6 @@ export default function Dashboard() {
         )
       );
     } catch (err) {
-      console.error("Error updating harvest:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -111,7 +107,6 @@ export default function Dashboard() {
         )
       );
     } catch (err) {
-      console.error("Error updating water change:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {

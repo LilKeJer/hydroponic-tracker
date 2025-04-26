@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Untuk debugging, nonaktifkan cek autentikasi sementara
-  // Uncomment kode di bawah jika sudah siap menerapkan autentikasi
-
   // Cek apakah user sudah login berdasarkan cookie user
   const user = request.cookies.get("user")?.value;
   const isAuthenticated = !!user;

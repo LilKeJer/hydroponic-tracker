@@ -34,6 +34,7 @@ export default function LoginPage() {
       } else {
         setError("Terjadi kesalahan saat login");
       }
+    } finally {
       setLoading(false);
     }
   };
