@@ -21,21 +21,46 @@ export default function AddTableDialog({
 }: AddTableDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [phValue, setPhValue] = useState<string>("");
+  const [ppmValue, setPpmValue] = useState<string>("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    // Convert pH and PPM to numbers if they exist
+    const phNumber = phValue ? parseFloat(phValue) : null;
+    const ppmNumber = ppmValue ? parseInt(ppmValue, 10) : null;
+
+    // Validate pH is between 0 and 14
+    if (phNumber !== null && (phNumber < 0 || phNumber > 14)) {
+      alert("Nilai PH harus antara 0 dan 14");
+      return;
+    }
+
+    // Validate PPM is a positive number
+    if (ppmNumber !== null && ppmNumber < 0) {
+      alert("Nilai PPM tidak boleh negatif");
+      return;
+    }
+
     onAdd({
       name,
       description,
-      lastHarvest: null,
-      lastWaterChange: null,
+      // Inisialisasi dengan nilai null untuk semua catatan panen dan ganti air
+      lastHarvest1: null, // Panen terdahulu
+      lastHarvest2: null, // Panen terbaru
+      lastWaterChange1: null, // Ganti air terdahulu
+      lastWaterChange2: null, // Ganti air terbaru
+      phValue: phNumber,
+      ppmValue: ppmNumber,
     });
 
     // Reset form
     setName("");
     setDescription("");
+    setPhValue("");
+    setPpmValue("");
   };
 
   return (
@@ -70,6 +95,34 @@ export default function AddTableDialog({
                 placeholder="contoh: Jenis tanaman, lokasi, dll"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="ph">Nilai PH</Label>
+                <Input
+                  id="ph"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="14"
+                  value={phValue}
+                  onChange={(e) => setPhValue(e.target.value)}
+                  placeholder="contoh: 6.5"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="ppm">Nilai PPM</Label>
+                <Input
+                  id="ppm"
+                  type="number"
+                  min="0"
+                  value={ppmValue}
+                  onChange={(e) => setPpmValue(e.target.value)}
+                  placeholder="contoh: 800"
+                />
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -80,7 +133,10 @@ export default function AddTableDialog({
             >
               Batal
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
               Simpan
             </Button>
           </DialogFooter>

@@ -22,9 +22,9 @@ export default function ConfirmDialog({
   icon,
 }: ConfirmDialogProps) {
   const variantStyles: Record<string, string> = {
-    green: "bg-green-600 hover:bg-green-700",
-    blue: "bg-blue-600 hover:bg-blue-700",
-    red: "bg-red-600 hover:bg-red-700",
+    green: "bg-green-600 hover:bg-green-700 text-white",
+    blue: "bg-blue-600 hover:bg-blue-700 text-white",
+    red: "bg-red-600 hover:bg-red-700 text-white",
   };
 
   const buttonClass = variantStyles[confirmVariant] || variantStyles.green;
@@ -38,11 +38,13 @@ export default function ConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             {icon}
             {title}
           </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription className="text-sm pt-2">
+            {description}
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-2 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>

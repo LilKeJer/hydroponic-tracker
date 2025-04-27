@@ -8,6 +8,7 @@ export default function TableCardList({
   onHarvest,
   onWaterChange,
   onDelete,
+  onUpdatePhPpm,
 }: TableCardListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -18,6 +19,11 @@ export default function TableCardList({
           onHarvest={() => onHarvest(table.id)}
           onWaterChange={() => onWaterChange(table.id)}
           onDelete={() => onDelete(table.id)}
+          onUpdatePhPpm={
+            onUpdatePhPpm
+              ? (ph, ppm) => onUpdatePhPpm(table.id, ph, ppm)
+              : undefined
+          }
         />
       ))}
     </div>

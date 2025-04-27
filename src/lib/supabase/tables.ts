@@ -29,10 +29,16 @@ export async function getTables(): Promise<HydroponicTable[]> {
     id: table.id,
     name: table.name,
     description: table.description,
-    lastHarvest: table.last_harvest_at ? new Date(table.last_harvest_at) : null,
-    lastWaterChange: table.last_water_change_at
-      ? new Date(table.last_water_change_at)
+    lastHarvest1: table.last_harvest_1 ? new Date(table.last_harvest_1) : null,
+    lastHarvest2: table.last_harvest_2 ? new Date(table.last_harvest_2) : null,
+    lastWaterChange1: table.last_water_change_1
+      ? new Date(table.last_water_change_1)
       : null,
+    lastWaterChange2: table.last_water_change_2
+      ? new Date(table.last_water_change_2)
+      : null,
+    phValue: table.ph_value || null,
+    ppmValue: table.ppm_value || null,
   })) as HydroponicTable[];
 }
 
@@ -50,12 +56,20 @@ export async function addTable(
     name: tableData.name,
     description: tableData.description || null,
     user_id: user.id,
-    last_harvest_at: tableData.lastHarvest
-      ? tableData.lastHarvest.toISOString()
+    last_harvest_1: tableData.lastHarvest1
+      ? tableData.lastHarvest1.toISOString()
       : null,
-    last_water_change_at: tableData.lastWaterChange
-      ? tableData.lastWaterChange.toISOString()
+    last_harvest_2: tableData.lastHarvest2
+      ? tableData.lastHarvest2.toISOString()
       : null,
+    last_water_change_1: tableData.lastWaterChange1
+      ? tableData.lastWaterChange1.toISOString()
+      : null,
+    last_water_change_2: tableData.lastWaterChange2
+      ? tableData.lastWaterChange2.toISOString()
+      : null,
+    ph_value: tableData.phValue || null,
+    ppm_value: tableData.ppmValue || null,
   };
 
   const { data, error } = await supabase
@@ -72,14 +86,20 @@ export async function addTable(
     id: data.id,
     name: data.name,
     description: data.description,
-    lastHarvest: data.last_harvest_at ? new Date(data.last_harvest_at) : null,
-    lastWaterChange: data.last_water_change_at
-      ? new Date(data.last_water_change_at)
+    lastHarvest1: data.last_harvest_1 ? new Date(data.last_harvest_1) : null,
+    lastHarvest2: data.last_harvest_2 ? new Date(data.last_harvest_2) : null,
+    lastWaterChange1: data.last_water_change_1
+      ? new Date(data.last_water_change_1)
       : null,
+    lastWaterChange2: data.last_water_change_2
+      ? new Date(data.last_water_change_2)
+      : null,
+    phValue: data.ph_value || null,
+    ppmValue: data.ppm_value || null,
   };
 }
 
-// Update status panen
+// Update status panen (menggeser panen 2 ke panen 1, dan set panen 2 sebagai tanggal sekarang)
 export async function updateHarvest(tableId: string): Promise<void> {
   const user = getCurrentUser();
 
@@ -87,15 +107,29 @@ export async function updateHarvest(tableId: string): Promise<void> {
     throw new Error("User tidak terautentikasi");
   }
 
+  // Ambil data meja saat ini untuk mendapatkan nilai panen 2
+  const { data: tableData, error: fetchError } = await supabase
+    .from("hydroponic_tables")
+    .select("last_harvest_2")
+    .eq("id", tableId)
+    .single();
+
+  if (fetchError) {
+    throw new Error("Gagal mendapatkan data meja");
+  }
+
   const now = new Date().toISOString();
 
-  // Update meja
-  const { error: tableError } = await supabase
+  // Update meja dengan menggeser panen 2 ke panen 1, dan set panen 2 sebagai now
+  const { error: updateError } = await supabase
     .from("hydroponic_tables")
-    .update({ last_harvest_at: now })
+    .update({
+      last_harvest_1: tableData.last_harvest_2 || null, // Panen 2 lama menjadi Panen 1
+      last_harvest_2: now, // Panen 2 baru
+    })
     .eq("id", tableId);
 
-  if (tableError) {
+  if (updateError) {
     throw new Error("Gagal update status panen");
   }
 
@@ -113,7 +147,7 @@ export async function updateHarvest(tableId: string): Promise<void> {
   }
 }
 
-// Update status ganti air
+// Update status ganti air (menggeser ganti air 2 ke ganti air 1, dan set ganti air 2 sebagai tanggal sekarang)
 export async function updateWaterChange(tableId: string): Promise<void> {
   const user = getCurrentUser();
 
@@ -121,15 +155,29 @@ export async function updateWaterChange(tableId: string): Promise<void> {
     throw new Error("User tidak terautentikasi");
   }
 
+  // Ambil data meja saat ini untuk mendapatkan nilai ganti air 2
+  const { data: tableData, error: fetchError } = await supabase
+    .from("hydroponic_tables")
+    .select("last_water_change_2")
+    .eq("id", tableId)
+    .single();
+
+  if (fetchError) {
+    throw new Error("Gagal mendapatkan data meja");
+  }
+
   const now = new Date().toISOString();
 
-  // Update meja
-  const { error: tableError } = await supabase
+  // Update meja dengan menggeser ganti air 2 ke ganti air 1, dan set ganti air 2 sebagai now
+  const { error: updateError } = await supabase
     .from("hydroponic_tables")
-    .update({ last_water_change_at: now })
+    .update({
+      last_water_change_1: tableData.last_water_change_2 || null, // Ganti air 2 lama menjadi Ganti air 1
+      last_water_change_2: now, // Ganti air 2 baru
+    })
     .eq("id", tableId);
 
-  if (tableError) {
+  if (updateError) {
     throw new Error("Gagal update status ganti air");
   }
 
@@ -163,4 +211,104 @@ export async function deleteTable(tableId: string): Promise<void> {
   if (error) {
     throw new Error("Gagal menghapus meja");
   }
+}
+
+// Update nilai PH dan PPM
+export async function updatePhPpm(
+  tableId: string,
+  phValue: number | null,
+  ppmValue: number | null
+): Promise<void> {
+  const user = getCurrentUser();
+
+  if (!user) {
+    throw new Error("User tidak terautentikasi");
+  }
+
+  // Persiapkan data update
+  type TableUpdateData = Record<string, number | null | string>;
+  const updateData: TableUpdateData = {};
+  if (phValue !== undefined && phValue !== null) {
+    updateData.ph_value = phValue;
+  }
+  if (ppmValue !== undefined && ppmValue !== null) {
+    updateData.ppm_value = ppmValue;
+  }
+
+  // Jika tidak ada data yang diupdate, batal
+  if (Object.keys(updateData).length === 0) {
+    return;
+  }
+
+  // Update tabel
+  const { error: updateError } = await supabase
+    .from("hydroponic_tables")
+    .update(updateData)
+    .eq("id", tableId);
+
+  if (updateError) {
+    throw new Error(`Gagal update nilai PH/PPM: ${updateError.message}`);
+  }
+
+  // Catat riwayat pengukuran
+  const { error: historyError } = await supabase
+    .from("measurement_history")
+    .insert([
+      {
+        table_id: tableId,
+        ph_value: phValue,
+        ppm_value: ppmValue,
+        measured_at: new Date().toISOString(),
+      },
+    ]);
+
+  if (historyError) {
+    console.error("Gagal mencatat riwayat pengukuran:", historyError);
+    // Tidak throw error di sini karena update utama sudah berhasil
+  }
+}
+
+// Mengambil riwayat pengukuran PH dan PPM
+interface MeasurementData {
+  id: string;
+  table_id: string;
+  ph_value: number | null;
+  ppm_value: number | null;
+  measured_at: string;
+  notes?: string;
+}
+
+export async function getMeasurementHistory(
+  tableId: string
+): Promise<MeasurementData[]> {
+  const user = getCurrentUser();
+
+  if (!user) {
+    throw new Error("User tidak terautentikasi");
+  }
+
+  // Verifikasi bahwa meja milik user ini
+  const { data: tableData, error: tableError } = await supabase
+    .from("hydroponic_tables")
+    .select("id")
+    .eq("id", tableId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (tableError || !tableData) {
+    throw new Error("Meja tidak ditemukan atau Anda tidak memiliki akses");
+  }
+
+  // Ambil riwayat pengukuran
+  const { data, error } = await supabase
+    .from("measurement_history")
+    .select("*")
+    .eq("table_id", tableId)
+    .order("measured_at", { ascending: false });
+
+  if (error) {
+    throw new Error("Gagal mengambil riwayat pengukuran");
+  }
+
+  return data || [];
 }
