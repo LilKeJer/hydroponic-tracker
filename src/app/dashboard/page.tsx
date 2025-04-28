@@ -146,6 +146,7 @@ export default function Dashboard() {
     }
   };
   // Fungsi untuk update nilai PH dan PPM
+  // Fungsi untuk update nilai PH dan PPM
   const handleUpdatePhPpm = async (
     id: string,
     ph: number | null,
@@ -162,6 +163,7 @@ export default function Dashboard() {
               ...table,
               phValue: ph,
               ppmValue: ppm,
+              lastMeasured: new Date(), // Gunakan waktu sekarang untuk pengukuran
             };
           }
           return table;

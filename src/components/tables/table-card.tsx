@@ -177,7 +177,6 @@ export default function TableCard({
                 <Activity className="h-4 w-4 mr-2" />
                 PH dan PPM
               </div>
-
               <div className="grid grid-cols-2 divide-x divide-yellow-200">
                 {/* PH */}
                 <div className="p-3 bg-yellow-50">
@@ -187,11 +186,19 @@ export default function TableCard({
                     </span>
                     Nilai PH
                   </div>
-                  <div className="text-xl font-bold text-center text-red-600">
+                  <div className="text-xl font-bold text-center text-red-600 mb-1">
                     {table.phValue !== null
                       ? table.phValue.toFixed(1)
                       : "Belum diukur"}
                   </div>
+                  {table.phValue !== null && (
+                    <div className="text-xs text-gray-500 text-center">
+                      Terakhir diukur:{" "}
+                      {table.lastMeasured
+                        ? formatDate(table.lastMeasured)
+                        : formatDate(new Date())}
+                    </div>
+                  )}
                 </div>
 
                 {/* PPM */}
@@ -200,11 +207,20 @@ export default function TableCard({
                     <BarChart className="h-4 w-4 mr-1" />
                     Nilai PPM
                   </div>
-                  <div className="text-xl font-bold text-center text-blue-600">
+                  <div className="text-xl font-bold text-center text-blue-600 mb-1">
                     {table.ppmValue !== null ? table.ppmValue : "Belum diukur"}
                   </div>
+                  {table.ppmValue !== null && (
+                    <div className="text-xs text-gray-500 text-center">
+                      Terakhir diukur:{" "}
+                      {table.lastMeasured
+                        ? formatDate(table.lastMeasured)
+                        : formatDate(new Date())}
+                    </div>
+                  )}
                 </div>
               </div>
+              s
               <div className="bg-yellow-100 p-2 text-center">
                 <Button
                   variant="outline"

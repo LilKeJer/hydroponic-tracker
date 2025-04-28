@@ -1,4 +1,6 @@
 // Definisi tipe untuk meja hidroponik dengan terminologi terdahulu/terbaru
+
+// Definisi tipe untuk meja hidroponik dengan terminologi terdahulu/terbaru
 export interface HydroponicTable {
   id: string;
   name: string;
@@ -8,8 +10,11 @@ export interface HydroponicTable {
   lastHarvest2: Date | null; // Panen terbaru
   lastWaterChange1: Date | null; // Ganti air terdahulu
   lastWaterChange2: Date | null; // Ganti air terbaru
+  // Tambahan untuk PH dan PPM
+  phValue: number | null; // Nilai PH terakhir diukur
+  ppmValue: number | null; // Nilai PPM terakhir diukur
+  lastMeasured: Date | null; // Waktu terakhir PH dan PPM diukur
 }
-
 // Tipe untuk props konfirmasi dialog
 export interface ConfirmDialogProps {
   open: boolean;

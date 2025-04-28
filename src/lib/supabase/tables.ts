@@ -2,6 +2,19 @@ import { supabase } from "./client";
 import { HydroponicTable } from "@/types";
 import { getCurrentUser } from "./auth";
 
+// Definisikan interface untuk data pengukuran
+interface MeasurementData {
+  id: string;
+  table_id: string;
+  ph_value: number | null;
+  ppm_value: number | null;
+  measured_at: string;
+  notes?: string;
+}
+
+// Tipe untuk data update
+type TableUpdateData = Record<string, number | null | string>;
+
 // Mengambil semua meja hidroponik milik user
 export async function getTables(): Promise<HydroponicTable[]> {
   const user = getCurrentUser();
@@ -39,6 +52,9 @@ export async function getTables(): Promise<HydroponicTable[]> {
       : null,
     phValue: table.ph_value || null,
     ppmValue: table.ppm_value || null,
+    lastMeasured: table.last_measured_at
+      ? new Date(table.last_measured_at)
+      : null,
   })) as HydroponicTable[];
 }
 
@@ -70,6 +86,8 @@ export async function addTable(
       : null,
     ph_value: tableData.phValue || null,
     ppm_value: tableData.ppmValue || null,
+    last_measured_at:
+      tableData.phValue || tableData.ppmValue ? new Date().toISOString() : null,
   };
 
   const { data, error } = await supabase
@@ -96,6 +114,9 @@ export async function addTable(
       : null,
     phValue: data.ph_value || null,
     ppmValue: data.ppm_value || null,
+    lastMeasured: data.last_measured_at
+      ? new Date(data.last_measured_at)
+      : null,
   };
 }
 
@@ -144,6 +165,7 @@ export async function updateHarvest(tableId: string): Promise<void> {
 
   if (eventError) {
     // Silently handle event error
+    console.warn("Catatan: Gagal mencatat riwayat panen di event log");
   }
 }
 
@@ -192,6 +214,7 @@ export async function updateWaterChange(tableId: string): Promise<void> {
 
   if (eventError) {
     // Silently handle event error
+    console.warn("Catatan: Gagal mencatat riwayat ganti air di event log");
   }
 }
 
@@ -226,7 +249,6 @@ export async function updatePhPpm(
   }
 
   // Persiapkan data update
-  type TableUpdateData = Record<string, number | null | string>;
   const updateData: TableUpdateData = {};
   if (phValue !== undefined && phValue !== null) {
     updateData.ph_value = phValue;
@@ -240,6 +262,10 @@ export async function updatePhPpm(
     return;
   }
 
+  // Tambahkan waktu pengukuran
+  const now = new Date().toISOString();
+  updateData.last_measured_at = now;
+
   // Update tabel
   const { error: updateError } = await supabase
     .from("hydroponic_tables")
@@ -250,34 +276,29 @@ export async function updatePhPpm(
     throw new Error(`Gagal update nilai PH/PPM: ${updateError.message}`);
   }
 
-  // Catat riwayat pengukuran
-  const { error: historyError } = await supabase
-    .from("measurement_history")
-    .insert([
-      {
+  // Nonaktifkan sementara pencatatan riwayat pengukuran
+  // TODO: Aktifkan kembali setelah tabel measurement_history dibuat dengan benar
+  /*
+  try {
+    const { error: historyError } = await supabase
+      .from('measurement_history')
+      .insert([{
         table_id: tableId,
         ph_value: phValue,
         ppm_value: ppmValue,
-        measured_at: new Date().toISOString(),
-      },
-    ]);
-
-  if (historyError) {
-    console.error("Gagal mencatat riwayat pengukuran:", historyError);
-    // Tidak throw error di sini karena update utama sudah berhasil
+        measured_at: now
+      }]);
+      
+    if (historyError) {
+      console.error('Gagal mencatat riwayat pengukuran:', JSON.stringify(historyError));
+    }
+  } catch (insertError) {
+    console.error('Error saat menyimpan riwayat:', insertError);
   }
+  */
 }
 
 // Mengambil riwayat pengukuran PH dan PPM
-interface MeasurementData {
-  id: string;
-  table_id: string;
-  ph_value: number | null;
-  ppm_value: number | null;
-  measured_at: string;
-  notes?: string;
-}
-
 export async function getMeasurementHistory(
   tableId: string
 ): Promise<MeasurementData[]> {
@@ -299,16 +320,22 @@ export async function getMeasurementHistory(
     throw new Error("Meja tidak ditemukan atau Anda tidak memiliki akses");
   }
 
+  // Untuk sementara, kembalikan array kosong karena tabel mungkin belum ada
+  return [];
+
+  /* 
+  // Aktifkan kembali setelah tabel measurement_history dibuat
   // Ambil riwayat pengukuran
   const { data, error } = await supabase
-    .from("measurement_history")
-    .select("*")
-    .eq("table_id", tableId)
-    .order("measured_at", { ascending: false });
-
+    .from('measurement_history')
+    .select('*')
+    .eq('table_id', tableId)
+    .order('measured_at', { ascending: false });
+    
   if (error) {
-    throw new Error("Gagal mengambil riwayat pengukuran");
+    throw new Error('Gagal mengambil riwayat pengukuran');
   }
-
+  
   return data || [];
+  */
 }
