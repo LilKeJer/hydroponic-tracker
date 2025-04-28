@@ -276,26 +276,27 @@ export async function updatePhPpm(
     throw new Error(`Gagal update nilai PH/PPM: ${updateError.message}`);
   }
 
-  // Nonaktifkan sementara pencatatan riwayat pengukuran
-  // TODO: Aktifkan kembali setelah tabel measurement_history dibuat dengan benar
-  /*
   try {
     const { error: historyError } = await supabase
-      .from('measurement_history')
-      .insert([{
-        table_id: tableId,
-        ph_value: phValue,
-        ppm_value: ppmValue,
-        measured_at: now
-      }]);
-      
+      .from("measurement_history")
+      .insert([
+        {
+          table_id: tableId,
+          ph_value: phValue,
+          ppm_value: ppmValue,
+          measured_at: now,
+        },
+      ]);
+
     if (historyError) {
-      console.error('Gagal mencatat riwayat pengukuran:', JSON.stringify(historyError));
+      console.error(
+        "Gagal mencatat riwayat pengukuran:",
+        JSON.stringify(historyError)
+      );
     }
   } catch (insertError) {
-    console.error('Error saat menyimpan riwayat:', insertError);
+    console.error("Error saat menyimpan riwayat:", insertError);
   }
-  */
 }
 
 // Mengambil riwayat pengukuran PH dan PPM
