@@ -54,6 +54,7 @@ export default function AddTableDialog({
       lastWaterChange2: null, // Ganti air terbaru
       phValue: phNumber,
       ppmValue: ppmNumber,
+      lastMeasured: phNumber !== null || ppmNumber !== null ? new Date() : null, // Tambahkan properti lastMeasured
     });
 
     // Reset form
@@ -62,7 +63,6 @@ export default function AddTableDialog({
     setPhValue("");
     setPpmValue("");
   };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">

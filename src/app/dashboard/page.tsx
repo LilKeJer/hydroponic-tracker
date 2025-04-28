@@ -77,7 +77,6 @@ export default function Dashboard() {
       }
     }
   };
-
   // Fungsi untuk menghapus meja
   const handleDeleteTable = async (id: string) => {
     try {
