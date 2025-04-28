@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,12 +37,12 @@ export default function UpdatePhPpmDialog({
   );
 
   // Reset values when dialog opens
-  useState(() => {
+  useEffect(() => {
     if (open) {
       setPhValue(currentPH !== null ? currentPH.toString() : "");
       setPpmValue(currentPPM !== null ? currentPPM.toString() : "");
     }
-  });
+  }, [open, currentPH, currentPPM]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
