@@ -220,7 +220,6 @@ export default function TableCard({
                   )}
                 </div>
               </div>
-              s
               <div className="bg-yellow-100 p-2 text-center">
                 <Button
                   variant="outline"

@@ -1,6 +1,4 @@
 // Definisi tipe untuk meja hidroponik dengan terminologi terdahulu/terbaru
-
-// Definisi tipe untuk meja hidroponik dengan terminologi terdahulu/terbaru
 export interface HydroponicTable {
   id: string;
   name: string;
@@ -15,6 +13,7 @@ export interface HydroponicTable {
   ppmValue: number | null; // Nilai PPM terakhir diukur
   lastMeasured: Date | null; // Waktu terakhir PH dan PPM diukur
 }
+
 // Tipe untuk props konfirmasi dialog
 export interface ConfirmDialogProps {
   open: boolean;
@@ -34,35 +33,6 @@ export interface AddTableDialogProps {
   onAdd: (table: Omit<HydroponicTable, "id">) => void;
 }
 
-// Tipe untuk props table card
-export interface TableCardProps {
-  table: HydroponicTable;
-  onHarvest: () => void;
-  onWaterChange: () => void;
-  onDelete: () => void;
-}
-
-// Tipe untuk props table card list
-export interface TableCardListProps {
-  tables: HydroponicTable[];
-  onHarvest: (id: string) => void;
-  onWaterChange: (id: string) => void;
-  onDelete: (id: string) => void;
-}
-// Definisi tipe untuk meja hidroponik dengan terminologi terdahulu/terbaru
-export interface HydroponicTable {
-  id: string;
-  name: string;
-  description?: string;
-  // Label yang lebih intuitif untuk catatan panen dan ganti air
-  lastHarvest1: Date | null; // Panen terdahulu
-  lastHarvest2: Date | null; // Panen terbaru
-  lastWaterChange1: Date | null; // Ganti air terdahulu
-  lastWaterChange2: Date | null; // Ganti air terbaru
-  // Tambahan untuk PH dan PPM
-  phValue: number | null; // Nilai PH terakhir diukur
-  ppmValue: number | null; // Nilai PPM terakhir diukur
-}
 // Tipe untuk props table card
 export interface TableCardProps {
   table: HydroponicTable;
