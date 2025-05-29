@@ -55,6 +55,7 @@ export async function getTables(): Promise<HydroponicTable[]> {
     lastMeasured: table.last_measured_at
       ? new Date(table.last_measured_at)
       : null,
+    nutrient_ml: table.nutrient_ml || 0, // Ensure it's always a number
   })) as HydroponicTable[];
 }
 
@@ -88,6 +89,8 @@ export async function addTable(
     ppm_value: tableData.ppmValue || null,
     last_measured_at:
       tableData.phValue || tableData.ppmValue ? new Date().toISOString() : null,
+    nutrient_ml: 0, // Inisialisasi nutrisi dengan 0
+    // Tambahkan kolom nutrisi jika diperlukan
   };
 
   const { data, error } = await supabase
@@ -117,6 +120,7 @@ export async function addTable(
     lastMeasured: data.last_measured_at
       ? new Date(data.last_measured_at)
       : null,
+    nutrient_ml: data.nutrient_ml || 0, // Add missing nutrient_ml
   };
 }
 
@@ -339,4 +343,114 @@ export async function getMeasurementHistory(
   
   return data || [];
   */
+}
+
+// Fungsi baru untuk menambah nutrisi
+export async function addNutrientToTable(
+  tableId: string,
+  amountToAdd: number
+): Promise<HydroponicTable | null> {
+  const user = getCurrentUser();
+
+  if (!user) {
+    console.error("User tidak terautentikasi");
+    return null;
+  }
+
+  // Pertama, ambil nilai nutrient_ml saat ini
+  const { data: currentTable, error: fetchError } = await supabase
+    .from("hydroponic_tables")
+    .select("nutrient_ml")
+    .eq("id", tableId)
+    .eq("user_id", user.id) // Add user verification
+    .single();
+
+  if (fetchError || !currentTable) {
+    console.error("Error fetching current nutrient level:", fetchError);
+    return null;
+  }
+
+  const currentNutrientMl = currentTable.nutrient_ml || 0;
+  const newNutrientMl = currentNutrientMl + amountToAdd;
+
+  // Kemudian, update dengan nilai baru
+  const { data, error: updateError } = await supabase
+    .from("hydroponic_tables")
+    .update({ nutrient_ml: newNutrientMl })
+    .eq("id", tableId)
+    .eq("user_id", user.id) // Add user verification
+    .select("*") // Select all columns
+    .single();
+
+  if (updateError) {
+    console.error("Error adding nutrient to table:", updateError);
+    return null;
+  }
+
+  // Convert Supabase data to HydroponicTable format
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    lastHarvest1: data.last_harvest_1 ? new Date(data.last_harvest_1) : null,
+    lastHarvest2: data.last_harvest_2 ? new Date(data.last_harvest_2) : null,
+    lastWaterChange1: data.last_water_change_1
+      ? new Date(data.last_water_change_1)
+      : null,
+    lastWaterChange2: data.last_water_change_2
+      ? new Date(data.last_water_change_2)
+      : null,
+    phValue: data.ph_value || null,
+    ppmValue: data.ppm_value || null,
+    lastMeasured: data.last_measured_at
+      ? new Date(data.last_measured_at)
+      : null,
+    nutrient_ml: data.nutrient_ml || 0,
+  };
+}
+
+// Fungsi baru untuk mereset nutrisi
+export async function resetNutrientForTable(
+  tableId: string
+): Promise<HydroponicTable | null> {
+  const user = getCurrentUser();
+
+  if (!user) {
+    console.error("User tidak terautentikasi");
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("hydroponic_tables")
+    .update({ nutrient_ml: 0 })
+    .eq("id", tableId)
+    .eq("user_id", user.id) // Add user verification
+    .select("*") // Select all columns
+    .single();
+
+  if (error) {
+    console.error("Error resetting nutrient for table:", error);
+    return null;
+  }
+
+  // Convert Supabase data to HydroponicTable format
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    lastHarvest1: data.last_harvest_1 ? new Date(data.last_harvest_1) : null,
+    lastHarvest2: data.last_harvest_2 ? new Date(data.last_harvest_2) : null,
+    lastWaterChange1: data.last_water_change_1
+      ? new Date(data.last_water_change_1)
+      : null,
+    lastWaterChange2: data.last_water_change_2
+      ? new Date(data.last_water_change_2)
+      : null,
+    phValue: data.ph_value || null,
+    ppmValue: data.ppm_value || null,
+    lastMeasured: data.last_measured_at
+      ? new Date(data.last_measured_at)
+      : null,
+    nutrient_ml: data.nutrient_ml || 0,
+  };
 }

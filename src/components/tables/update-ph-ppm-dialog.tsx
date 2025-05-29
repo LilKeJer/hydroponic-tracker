@@ -30,17 +30,17 @@ export default function UpdatePhPpmDialog({
   onUpdate,
 }: UpdatePhPpmDialogProps) {
   const [phValue, setPhValue] = useState<string>(
-    currentPH !== null ? currentPH.toString() : ""
+    currentPH != null ? currentPH.toString() : ""
   );
   const [ppmValue, setPpmValue] = useState<string>(
-    currentPPM !== null ? currentPPM.toString() : ""
+    currentPPM != null ? currentPPM.toString() : ""
   );
 
   // Reset values when dialog opens
   useEffect(() => {
     if (open) {
-      setPhValue(currentPH !== null ? currentPH.toString() : "");
-      setPpmValue(currentPPM !== null ? currentPPM.toString() : "");
+      setPhValue(currentPH != null ? currentPH.toString() : "");
+      setPpmValue(currentPPM != null ? currentPPM.toString() : "");
     }
   }, [open, currentPH, currentPPM]);
 

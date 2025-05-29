@@ -21,6 +21,7 @@ import {
 import ConfirmDialog from "./confirm-dialog";
 import { TableCardProps } from "@/types";
 import UpdatePhPpmDialog from "./update-ph-ppm-dialog";
+import { UpdateNutrientDialog } from "./update-nutrient-dialog";
 
 // Format tanggal ke format DD-MM-YYYY dan jam HH:MM
 function formatDate(date: Date | null | undefined): string {
@@ -49,11 +50,14 @@ export default function TableCard({
   onWaterChange,
   onDelete,
   onUpdatePhPpm,
+  onAddNutrient,
+  onResetNutrient,
 }: TableCardProps) {
   const [isHarvestDialogOpen, setIsHarvestDialogOpen] = useState(false);
   const [isWaterDialogOpen, setIsWaterDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPhPpmDialogOpen, setIsPhPpmDialogOpen] = useState(false);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   return (
     <Card className="border-green-100 shadow-md hover:shadow-lg transition-shadow">
@@ -186,12 +190,14 @@ export default function TableCard({
                     </span>
                     Nilai PH
                   </div>
+
                   <div className="text-xl font-bold text-center text-red-600 mb-1">
-                    {table.phValue !== null
+                    {table.phValue != null
                       ? table.phValue.toFixed(1)
                       : "Belum diukur"}
                   </div>
-                  {table.phValue !== null && (
+
+                  {table.phValue != null && (
                     <div className="text-xs text-gray-500 text-center">
                       Terakhir diukur:{" "}
                       {table.lastMeasured
@@ -229,6 +235,55 @@ export default function TableCard({
                 >
                   <Activity className="h-4 w-4 mr-1" /> Update PH & PPM
                 </Button>
+              </div>
+            </div>
+
+            {/* Bagian Nutrisi */}
+            <div className="rounded-md overflow-hidden border border-purple-200 mt-4">
+              {/* Header Nutrisi */}
+              <div className="bg-purple-500 px-3 py-2 text-white font-medium flex items-center">
+                <Droplets className="h-4 w-4 mr-2" />
+                Nutrisi
+              </div>
+              <div className="p-3 bg-purple-50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-lg font-bold text-purple-800">
+                    {table.nutrient_ml ?? 0} ml
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-purple-700 border-purple-300 hover:bg-purple-200"
+                    onClick={() => setIsResetConfirmOpen(true)}
+                  >
+                    Reset Nutrisi
+                  </Button>
+                </div>
+
+                <div className="text-sm text-gray-600 mb-2">
+                  Tambah atau ubah jumlah nutrisi untuk meja ini.
+                </div>
+
+                {onAddNutrient ? (
+                  <UpdateNutrientDialog
+                    table={table}
+                    onSaveNutrient={async (tableId: string, amount: number) => {
+                      if (onAddNutrient) {
+                        return await onAddNutrient(tableId, amount); // Return the result instead of null
+                      }
+                      return null;
+                    }}
+                  >
+                    <Button variant="default" className="w-full">
+                      <Droplets className="mr-2 h-4 w-4" />
+                      Tambah Nutrisi
+                    </Button>
+                  </UpdateNutrientDialog>
+                ) : (
+                  <div className="text-gray-500 text-sm">
+                    Fitur tambah nutrisi tidak tersedia.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -294,6 +349,18 @@ export default function TableCard({
         confirmVariant="red"
         onConfirm={onDelete}
         icon={<Trash2 className="h-5 w-5 text-red-600" />}
+      />
+
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Reset Nutrisi?"
+        description={`Anda yakin ingin mereset nutrisi untuk meja "${table.name}" menjadi 0 ml?`}
+        confirmVariant="red"
+        onConfirm={() => {
+          if (onResetNutrient) onResetNutrient(table.id);
+        }}
+        confirmText="Reset Nutrisi"
       />
 
       {/* Dialog Update PH dan PPM */}

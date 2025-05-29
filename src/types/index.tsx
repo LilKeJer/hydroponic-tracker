@@ -12,6 +12,7 @@ export interface HydroponicTable {
   phValue: number | null; // Nilai PH terakhir diukur
   ppmValue: number | null; // Nilai PPM terakhir diukur
   lastMeasured: Date | null; // Waktu terakhir PH dan PPM diukur
+  nutrient_ml: number; // Make required instead of optional
 }
 
 // Tipe untuk props konfirmasi dialog
@@ -40,6 +41,11 @@ export interface TableCardProps {
   onWaterChange: () => void;
   onDelete: () => void;
   onUpdatePhPpm?: (ph: number | null, ppm: number | null) => void;
+  onAddNutrient?: (
+    id: string,
+    amount: number
+  ) => Promise<HydroponicTable | null>; // Keep consistent
+  onResetNutrient?: (id: string) => void;
 }
 
 // Tipe untuk props table card list
@@ -49,4 +55,9 @@ export interface TableCardListProps {
   onWaterChange: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdatePhPpm?: (id: string, ph: number | null, ppm: number | null) => void;
+  onAddNutrient?: (
+    id: string,
+    amount: number
+  ) => Promise<HydroponicTable | null>; // Keep consistent
+  onResetNutrient?: (id: string) => void;
 }

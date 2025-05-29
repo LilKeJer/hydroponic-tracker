@@ -13,6 +13,8 @@ import {
   updateWaterChange,
   deleteTable,
   updatePhPpm,
+  addNutrientToTable,
+  resetNutrientForTable,
 } from "@/lib/supabase/tables";
 import { signOut } from "@/lib/supabase/auth";
 import { useRouter } from "next/navigation";
@@ -182,6 +184,53 @@ export default function Dashboard() {
     router.push("/login");
   };
 
+  const handleTableUpdated = (updatedTable: HydroponicTable) => {
+    setTables((prevTables) =>
+      prevTables.map((t) => (t.id === updatedTable.id ? updatedTable : t))
+    );
+  };
+
+  // Handler BARU untuk menambah nutrisi
+  const handleAddNutrientToTable = async (
+    tableId: string,
+    amount: number
+  ): Promise<HydroponicTable | null> => {
+    setError(null); // Reset error sebelumnya
+    try {
+      const updatedTable = await addNutrientToTable(tableId, amount); // API call
+      if (updatedTable) {
+        handleTableUpdated(updatedTable); // Update state lokal
+        return updatedTable;
+      }
+      setError("Gagal menambahkan nutrisi."); // Set error jika API gagal tapi tidak melempar exception
+      return null;
+    } catch (e) {
+      console.error("Error adding nutrient from dashboard:", e);
+      setError("Terjadi kesalahan saat menambahkan nutrisi.");
+      return null;
+    }
+  };
+
+  // Handler BARU untuk mereset nutrisi
+  const handleResetNutrientOnTable = async (
+    tableId: string
+  ): Promise<HydroponicTable | null> => {
+    setError(null); // Reset error sebelumnya
+    try {
+      const updatedTable = await resetNutrientForTable(tableId); // API call
+      if (updatedTable) {
+        handleTableUpdated(updatedTable); // Update state lokal
+        return updatedTable;
+      }
+      setError("Gagal mereset nutrisi.");
+      return null;
+    } catch (e) {
+      console.error("Error resetting nutrient from dashboard:", e);
+      setError("Terjadi kesalahan saat mereset nutrisi.");
+      return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
@@ -256,6 +305,8 @@ export default function Dashboard() {
             onWaterChange={handleWaterChange}
             onDelete={handleDeleteTable}
             onUpdatePhPpm={handleUpdatePhPpm}
+            onAddNutrient={handleAddNutrientToTable} // Handler baru
+            onResetNutrient={handleResetNutrientOnTable} // Handler baru
           />
         )}
       </main>

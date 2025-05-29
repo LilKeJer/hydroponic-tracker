@@ -9,6 +9,8 @@ export default function TableCardList({
   onWaterChange,
   onDelete,
   onUpdatePhPpm,
+  onAddNutrient,
+  onResetNutrient,
 }: TableCardListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -23,6 +25,14 @@ export default function TableCardList({
             onUpdatePhPpm
               ? (ph, ppm) => onUpdatePhPpm(table.id, ph, ppm)
               : undefined
+          }
+          onAddNutrient={
+            onAddNutrient
+              ? (id, amount) => onAddNutrient(id, amount) // Fix: pass id directly instead of wrapping
+              : undefined
+          }
+          onResetNutrient={
+            onResetNutrient ? () => onResetNutrient(table.id) : undefined
           }
         />
       ))}

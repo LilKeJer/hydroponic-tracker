@@ -55,6 +55,7 @@ export default function AddTableDialog({
       phValue: phNumber,
       ppmValue: ppmNumber,
       lastMeasured: phNumber !== null || ppmNumber !== null ? new Date() : null, // Tambahkan properti lastMeasured
+      nutrient_ml: 0, // Add missing nutrient_ml initialization
     });
 
     // Reset form
